@@ -207,8 +207,7 @@ class GinXBuilder:
         if self.__new_project_data and project_name is None:
             return self.edges_mean(self.__new_project_data, project_name)
 
-        if project_name and pathlib.Path(
-                '.ginx/{0}/{0}-edges.graph'.format(project_name)).is_file():
+        if project_name and pathlib.Path('.ginx/{0}/{0}-edges.graph'.format(project_name)).is_file():
 
             with open('.ginx/{0}/{0}-edges.graph'.format(project_name)) as graph:
                 return self.edges_mean(json.load(graph), project_name)

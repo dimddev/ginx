@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 
-gins_dev = {'develop': [
+ginx_dev = {'develop': [
     "pep8-naming>=0.3.3",   # MIT license
     "flake8>=2.5.1",        # MIT license
     "pyflakes>=1.0.0",      # MIT license
@@ -13,14 +13,14 @@ gins_dev = {'develop': [
 extras_require = ['numpy', 'scipy', 'matplotlib']
 
 setup(
-    name='gins',
+    name='ginx',
     version='0.0.1',
     description='Gins (Graph inspector) is a CLI tool for inspecting, creating graphs and much more. Works with NetworkX',
     author='Dimitar Dimitrov',
     author_email='targolini@gmail.com',
-    url='https://github.com/dimddev/gins',
+    url='https://github.com/dimddev/ginx',
     packages=find_packages(),
-    test_suite='gins.tests',
+    test_suite='ginx.tests',
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -47,6 +47,6 @@ setup(
         'networkx'             # MIT license
     ] + extras_require,
 
-    scripts=['bin/gins'],
-    extras_require=gins_dev
+    scripts=['bin/ginx'],
+    extras_require=ginx_dev
 )
