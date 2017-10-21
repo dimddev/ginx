@@ -1,16 +1,19 @@
 #!/usr/bin/env python
+from subprocess import call
 from setuptools import setup, find_packages
-
+from distutils.command.build_py import build_py as _build_py
 
 ginx_dev = {'develop': [
-    "pep8-naming>=0.3.3",   # MIT license
-    "flake8>=2.5.1",        # MIT license
-    "pyflakes>=1.0.0",      # MIT license
+    "pylint>=1.0.0",      # MIT license
     "coverage",
     ]
 }
 
-extras_require = ['numpy', 'scipy', 'matplotlib']
+
+class install_numpy_scipy(_build_py):
+    """Customized setuptools install command - because of strange bug with scipy"""
+    call(['pip', 'install', 'numpy'])
+    call(['pip', 'install', 'scipy'])
 
 setup(
     name='ginx',
@@ -21,6 +24,9 @@ setup(
     url='https://github.com/dimddev/ginx',
     packages=find_packages(),
     test_suite='ginx.tests',
+    cmdclass={
+        'install_numpy_scipy': install_numpy_scipy
+    },
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -33,20 +39,19 @@ setup(
         'Topic :: Software Development :: Tools',
 
         # Pick your license as you wish (should match "license" above)
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD3 License',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        "Programming Language :: Python :: Implementation :: PyPy"
+    ],
+    install_requires=[
+        'click',
+        'networkx',
+        'matplotlib'
     ],
 
-    install_requires=[
-        'click',              # MIT license
-        'networkx'             # MIT license
-    ] + extras_require,
-
-    scripts=['bin/ginx'],
+    scripts=['bin/ginx.py'],
     extras_require=ginx_dev
 )
