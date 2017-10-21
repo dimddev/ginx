@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from distutils.command.build_py import build_py as _build_py
 
 ginx_dev = {'develop': [
-    "pylint>=1.0.0",      # MIT license
+    "pylint",      # MIT license
     "coverage",
     ]
 }
@@ -52,6 +52,6 @@ setup(
         'matplotlib'
     ],
 
-    scripts=['bin/ginx.py'],
+    scripts=['bin/ginx'],
     extras_require=ginx_dev
 )
