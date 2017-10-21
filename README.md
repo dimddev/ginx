@@ -1,13 +1,13 @@
 ----
 ## GinX
 
-Ginx - acronym from Graph Inspector is a simple command line tool for creating and quering graphs.
+Ginx - acronym from Graph Inspector is a simple command line tool for creating and querying graphs.
 GinX using NetworkX and it depends on numpy, scipy and matplotlib.
 
 ----
 ## Installation:
 
-    # lets create some working directory
+    # let's create some working directory
     $ mkdir test && cd test
 	# then clone the ginx
     $ git clone https://github.com/dimddev/ginx
@@ -15,7 +15,7 @@ GinX using NetworkX and it depends on numpy, scipy and matplotlib.
 ----
 ## Using of virtualenv
 
-Virtualenv will keep clean your global python ecosystem, if you prefer `docker` skip the next few lines.
+Virtualenv will keeping clear your global python ecosystem, if you prefer `docker` skip the next few lines.
 
 In case `virtualenv` is not installed, you could type:
 
@@ -29,7 +29,7 @@ next activate it with:
 
     $ source .env/bin/activate
 
-and finally lets install ginx:
+and finally let's install ginx:
 
     $ cd ginx/ginx
     $ python setup install
@@ -37,11 +37,11 @@ and finally lets install ginx:
 ----
 ## Using of docker
 
-If you prefer to use docker, go one directory back, and start the script
+If you prefer to use docker, go one directory back, and run the script
 
     $ ./install_ginx_on_docker.sh
 
-After setup is done, you could connect to ginx as usual.
+After setup is done, you could run and connect to docker ginx as usual.
 
 ----
 ## Usage:
