@@ -1,0 +1,114 @@
+#!/usr/bin/env python3.5
+"""
+GinX a Graph Inspector
+"""
+import click
+from ginxcli.api.common import GinXBuilder
+from ginxcli.api.ginx_query import GinXQuery
+
+
+# TODO
+# 2. More segmented code, re-organaizing, refactoring, testing.
+# 3. More commands and options to be provided
+
+
+@click.group()
+@click.option('-q', is_flag=True, help='Remove the head line before the result')
+def main(q):
+    """Graph Inspector
+    """
+    pass
+
+@click.command()
+@click.argument('INIT_FILE', nargs=1)
+def project(init_file):
+    """Init new project from json or csv files"""
+
+    if init_file:
+        djb = GinXBuilder()
+        djb.init_from_file(init_file)
+
+@click.command()
+@click.argument('project', type=click.STRING)
+@click.option('-f', type=click.STRING, help='Used together with SP, select the start node')
+@click.option('-t', type=click.STRING, help='Used together with SP, select the end node')
+def gpath(project, f, t):
+    """Get graph paths (SP) between nodeA and nodeB"""
+
+    djb = GinXBuilder()
+
+    if project:
+        ginx_graph = GinXQuery(djb.load_project(project))
+
+        if f and t:
+            click.echo('Get shortest path between {} and {}'.format(f, t))
+            click.echo(ginx_graph.get_shortest_paths(f, t))
+
+@click.command()
+@click.argument('project', type=click.STRING)
+@click.option('-c', is_flag=True, help='Print the current flow closeness centrality.\
+Compute current-flow closeness centrality for nodes. Current-flow closeness centrality is variant of closeness \
+centrality based on effective resistance between nodes in a network. This metric is also known as information centrality')
+@click.option('-b', is_flag=True, help='''Communicability betweenness centrality. Return subgraph
+communicability for all pairs of nodes in G. Communicability betweenness measure makes use of the number of walks \
+connecting every pair of nodes as the basis of a betweenness centrality measure.''')
+@click.option('-f', is_flag=True, help='''Print the current flow betweenness centrality. Current-flow betweenness \
+centrality uses an electrical current model for information spreading in contrast to betweenness centrality which
+uses shortest paths.''')
+@click.option('-d', is_flag=True, help='Print distance measures center')
+@click.option('-p', is_flag=True, help='Print distance measures periphery')
+@click.option('-t', is_flag=True, help='Print the numbers of triangles that include a node as one vertex')
+@click.option('-s', is_flag=True, help='Use matplotlib to draw the graph')
+def gquery(project, c, b, f, s, d, p, t):
+    """gquery - perform statistical operations"""
+
+    djb = GinXBuilder()
+
+    if project:
+        ginx_graph = GinXQuery(djb.load_project(project))
+
+        if c:
+            click.echo('Current flow closeness centrality:')
+            click.echo(ginx_graph.current_flow_closeness_centrality())
+
+        if b:
+            click.echo('Communicability betweenness centrality:')
+            click.echo(ginx_graph.communicability_betweenness_centrality())
+
+        if f:
+            click.echo('Current flow betweenness centrality')
+            click.echo(ginx_graph.current_flow_betweenness_centrality())
+
+        if t:
+            click.echo('Print the numbers of triangles that include a node as one vertex')
+            click.echo(ginx_graph.triangles())
+
+        if d:
+            click.echo('Distance measures center:')
+            click.echo(ginx_graph.d_central())
+
+        if p:
+            click.echo('Distance measures periphery')
+            click.echo(ginx_graph.d_periphery())
+
+        if s:
+            ginx_graph.showme()
+
+@click.command()
+def docker():
+    """GinX use docker container as computing machine.
+    All dependecies are installed there."""
+    pass
+
+@click.command()
+def aws():
+    """GinX use AWS as computing architecture. Using S3, Lambdas and more"""
+    pass
+
+if __name__ == '__main__':
+    main.add_command(project)
+    main.add_command(gquery)
+    main.add_command(gpath)
+    main.add_command(aws)
+    main.add_command(docker)
+    main()
