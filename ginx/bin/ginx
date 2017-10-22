@@ -3,8 +3,9 @@
 GinX a Graph Inspector
 """
 import click
-from ginxcli.api.common import GinXBuilder
+from ginxcli.api.ginx_project import GinXBuilder
 from ginxcli.api.ginx_query import GinXQuery
+from ginxcli.api.ginx_paths import GinXPaths
 
 
 # TODO
@@ -29,23 +30,24 @@ def project(init_file):
         djb.init_from_file(init_file)
 
 @click.command()
-@click.argument('project', type=click.STRING)
+@click.argument('project_name', type=click.STRING)
 @click.option('-f', type=click.STRING, help='Used together with SP, select the start node')
 @click.option('-t', type=click.STRING, help='Used together with SP, select the end node')
-def gpath(project, f, t):
+@click.option('-P', is_flag=True, help='Use this when you look for shortest path')
+@click.option('-A', is_flag=True, help='Use this when you look for all shortest paths')
+@click.option('-s', is_flag=True, help='Use matplotlib to draw shortpath(s) over the graph')
+def gpath(project_name, f, t, s, P, A):
     """Get graph paths (SP) between nodeA and nodeB"""
 
     djb = GinXBuilder()
 
-    if project:
-        ginx_graph = GinXQuery(djb.load_project(project))
+    ginx_graph = GinXPaths(djb.load_project(project_name))
 
-        if f and t:
-            click.echo('Get shortest path between {} and {}'.format(f, t))
-            click.echo(ginx_graph.get_shortest_paths(f, t))
+    if f and t:
+        click.echo(ginx_graph.get_shortest_paths(f, t))
 
 @click.command()
-@click.argument('project', type=click.STRING)
+@click.argument('project_name', type=click.STRING)
 @click.option('-c', is_flag=True, help='Print the current flow closeness centrality.\
 Compute current-flow closeness centrality for nodes. Current-flow closeness centrality is variant of closeness \
 centrality based on effective resistance between nodes in a network. This metric is also known as information centrality')
@@ -59,40 +61,33 @@ uses shortest paths.''')
 @click.option('-p', is_flag=True, help='Print distance measures periphery')
 @click.option('-t', is_flag=True, help='Print the numbers of triangles that include a node as one vertex')
 @click.option('-s', is_flag=True, help='Use matplotlib to draw the graph')
-def gquery(project, c, b, f, s, d, p, t):
+def gquery(project_name, c, b, f, s, d, p, t):
     """gquery - perform statistical operations"""
 
     djb = GinXBuilder()
 
-    if project:
-        ginx_graph = GinXQuery(djb.load_project(project))
+    ginx_graph = GinXQuery(djb.load_project(project_name))
 
-        if c:
-            click.echo('Current flow closeness centrality:')
-            click.echo(ginx_graph.current_flow_closeness_centrality())
+    if c:
+        click.echo(ginx_graph.current_flow_closeness_centrality())
 
-        if b:
-            click.echo('Communicability betweenness centrality:')
-            click.echo(ginx_graph.communicability_betweenness_centrality())
+    if b:
+        click.echo(ginx_graph.communicability_betweenness_centrality())
 
-        if f:
-            click.echo('Current flow betweenness centrality')
-            click.echo(ginx_graph.current_flow_betweenness_centrality())
+    if f:
+        click.echo(ginx_graph.current_flow_betweenness_centrality())
 
-        if t:
-            click.echo('Print the numbers of triangles that include a node as one vertex')
-            click.echo(ginx_graph.triangles())
+    if t:
+        click.echo(ginx_graph.triangles())
 
-        if d:
-            click.echo('Distance measures center:')
-            click.echo(ginx_graph.d_central())
+    if d:
+        click.echo(ginx_graph.d_central())
 
-        if p:
-            click.echo('Distance measures periphery')
-            click.echo(ginx_graph.d_periphery())
+    if p:
+        click.echo(ginx_graph.d_periphery())
 
-        if s:
-            ginx_graph.showme()
+    if s:
+        ginx_graph.showme()
 
 @click.command()
 def docker():

@@ -76,16 +76,14 @@ class GinXBuilder:
         """
 
         if not pathlib.Path(from_file).is_file():
-            click.echo('File not found')
+            click.echo('File {} not found'.format(from_file))
             return
 
         with open('{}'.format(from_file)) as graph:
 
             extension = pathlib.PurePath(from_file).suffix
+
             if extension == '.json':
-                # TODO
-                # to be passed as argument to self.process_new_project()
-                # self.from_file is used by self.process_new_project()
                 self.from_file = json.load(graph)
 
             elif extension == '.csv':
@@ -99,7 +97,7 @@ class GinXBuilder:
                 click.echo('File format {} is not supported!'.format(extension))
 
             if new_project:
-                self.process_new_project()
+                self.process_new_project(from_file=self.from_file)
 
     def project_name(self):
         """project_name"""
@@ -138,18 +136,23 @@ class GinXBuilder:
         with open('{}/.ginx/{}/{}-edges.graph'.format(self.__user_home, project_name, file_name), 'w') as graph_file:
             graph_file.write(json.dumps(data, indent=2))
 
-    def process_new_project(self, hello=True):
+    def process_new_project(self, **kwargs):
         """process_new_project
 
         :param hello
         """
 
         data = {}
+        from_file = kwargs.get('from_file')
 
-        if hello:
+        if not from_file:
+            click.echo('From file is missing')
+            return False
+
+        if kwargs.get('hello'):
 
             click.echo('Hello from FGraph detective.')
-            click.echo('Please answering honestly on the next questions for best characteristic.')
+            click.echo('Please answering on the next questions for best characteristic.')
             click.echo('The answers are numbers ( integer ) from 1 to 10.')
             click.echo('When you choose answer between 1 to 5, that means, you having this answer,')
             click.echo('as something close to you, but if you choose an answer bigger than 5,')
@@ -162,18 +165,17 @@ class GinXBuilder:
         if os.path.isdir('{}/.ginx/{}'.format(self.__user_home, project_name)):
 
             click.echo('A project with this name exist, please choose new one...')
-            self.process_new_project(False)
+            self.process_new_project(hello=False)
             return
 
-        # self.from_file is set by self.init_from_file()
-        for crew in self.from_file:
+        for crew in from_file:
 
             data[crew] = []
             temp = []
 
             click.echo('Item: {}'.format(crew))
 
-            for crew_fship in self.from_file:
+            for crew_fship in from_file:
 
                 if crew == crew_fship:
                     continue
@@ -198,7 +200,6 @@ class GinXBuilder:
 
         self.write_graph_db(project_name, data, project_name)
         click.echo('Graph for project {} was created'.format(project_name))
-        self.__new_project_data = data
 
     def load_project(self, project_name=None):
         """load_project
@@ -206,10 +207,6 @@ class GinXBuilder:
         :param project_name
         """
         if project_name and pathlib.Path('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)).is_file():
-
-            # self.__new_project_data is set by the process_new_project
-            if self.__new_project_data and project_name is None:
-                return self.edges_mean(self.__new_project_data, project_name)
 
             with open('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)) as graph:
                 return self.edges_mean(json.load(graph), project_name)
