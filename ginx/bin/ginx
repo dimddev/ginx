@@ -31,20 +31,46 @@ def project(init_file):
 
 @click.command()
 @click.argument('project_name', type=click.STRING)
-@click.option('-f', type=click.STRING, help='Used together with SP, select the start node')
-@click.option('-t', type=click.STRING, help='Used together with SP, select the end node')
+@click.option('-f', type=click.STRING, help='From Node. Select the start node')
+@click.option('-t', type=click.STRING, help='To Node. Select the end node')
 @click.option('-P', is_flag=True, help='Use this when you look for shortest path')
 @click.option('-A', is_flag=True, help='Use this when you look for all shortest paths')
 @click.option('-s', is_flag=True, help='Use matplotlib to draw shortpath(s) over the graph')
-def gpath(project_name, f, t, s, P, A):
+@click.option('-O', is_flag=True, help='Save graph as png')
+def gpath(project_name, f, t, s, p, a, o):
     """Get graph paths (SP) between nodeA and nodeB"""
 
-    djb = GinXBuilder()
+    ginx_builder = GinXBuilder()
 
-    ginx_graph = GinXPaths(djb.load_project(project_name))
+    if not f or not t:
+        click.echo('From and To are required parameters')
+        return False
 
-    if f and t:
-        click.echo(ginx_graph.get_shortest_paths(f, t))
+    if not a and not p:
+        click.echo('You have to provide -A or -P flag to complete this command')
+        return False
+
+    ginx_graph = GinXPaths(ginx_builder.load_project(project_name))
+
+    if f and t and a and not p:
+
+        s_paths = ginx_graph.get_shortest_paths(f, t)
+        click.echo(s_paths)
+
+        if s:
+            ginx_graph.showme(s_paths)
+
+        return True
+
+    if f and t and p and not a:
+
+        s_path = ginx_graph.get_shortest_path(f, t)
+        click.echo(s_path)
+
+        if s:
+            ginx_graph.showme()
+
+        return True
 
 @click.command()
 @click.argument('project_name', type=click.STRING)

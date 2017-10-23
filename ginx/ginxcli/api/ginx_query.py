@@ -12,10 +12,6 @@ from .ginx_shared import GinXBase
 class GinXQuery(GinXBase):
     """GinXQuery"""
 
-    def __init__(self, graph_data):
-        """__init__"""
-        super().__init__(graph_data)
-
     def girvan_newman(self):
         """Finds communities in a graph using the Girvan–Newman method."""
         # https://github.com/networkx/networkx/blob/master/networkx/algorithms/community/centrality.py
