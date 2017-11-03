@@ -2,6 +2,7 @@
 """
 GinX a Graph Inspector
 """
+import json
 import click
 from ginxcli.api.ginx_project import GinXBuilder
 from ginxcli.api.ginx_query import GinXQuery
@@ -15,7 +16,8 @@ from ginxcli.api.ginx_paths import GinXPaths
 
 @click.group()
 @click.option('-q', is_flag=True, help='Remove the head line before the result')
-def main(q):
+@click.option('-s', is_flag=True, help='Use matplotlib to draw shortpath(s) over the graph')
+def main(q, s):
     """Graph Inspector
     """
     pass
@@ -58,7 +60,7 @@ def gpath(project_name, f, t, s, p, a, o):
         click.echo(s_paths)
 
         if s:
-            ginx_graph.showme(s_paths)
+            ginx_graph.showme_path(json.loads(s_paths))
 
         return True
 
@@ -68,52 +70,107 @@ def gpath(project_name, f, t, s, p, a, o):
         click.echo(s_path)
 
         if s:
-            ginx_graph.showme()
+            ginx_graph.showme_path(json.loads(s_path))
 
         return True
 
 @click.command()
 @click.argument('project_name', type=click.STRING)
-@click.option('-c', is_flag=True, help='Print the current flow closeness centrality.\
-Compute current-flow closeness centrality for nodes. Current-flow closeness centrality is variant of closeness \
-centrality based on effective resistance between nodes in a network. This metric is also known as information centrality')
-@click.option('-b', is_flag=True, help='''Communicability betweenness centrality. Return subgraph
-communicability for all pairs of nodes in G. Communicability betweenness measure makes use of the number of walks \
-connecting every pair of nodes as the basis of a betweenness centrality measure.''')
-@click.option('-f', is_flag=True, help='''Print the current flow betweenness centrality. Current-flow betweenness \
-centrality uses an electrical current model for information spreading in contrast to betweenness centrality which
-uses shortest paths.''')
-@click.option('-d', is_flag=True, help='Print distance measures center')
-@click.option('-p', is_flag=True, help='Print distance measures periphery')
+@click.option('-c', is_flag=True, help='Compute current-flow closeness centrality for nodes (information centrality)')
+@click.option('-b', is_flag=True, help='Return subgraph communicability for all pairs of nodes in G.')
+@click.option('-f', is_flag=True, help='Print the current flow betweenness centrality. Current-flow betweenness')
+@click.option('-w', is_flag=True, help='Compute the shortest-path betweenness centrality for nodes')
+@click.option('-m', is_flag=True, help='Finds communities in a graph using the Girvan–Newman method')
 @click.option('-t', is_flag=True, help='Print the numbers of triangles that include a node as one vertex')
 @click.option('-s', is_flag=True, help='Use matplotlib to draw the graph')
-def gquery(project_name, c, b, f, s, d, p, t):
+def gquery(project_name, c, b, f, s, t, m, w):
     """gquery - perform statistical operations"""
 
     djb = GinXBuilder()
 
     ginx_graph = GinXQuery(djb.load_project(project_name))
 
+    flags = (c, b, f, s, t, m, w, )
+
     if c:
-        click.echo(ginx_graph.current_flow_closeness_centrality())
+
+        result = ginx_graph.current_flow_closeness_centrality()
+        click.echo(result)
+
+        if s:
+            ginx_graph.showme_centrality(
+            # ginx_graph.showbar(
+                json.loads(result),
+                'Current Flow Closseness Centrality for: {}'.format(project_name) # , project_name
+            )
+
+        return
 
     if b:
-        click.echo(ginx_graph.communicability_betweenness_centrality())
+
+        result = ginx_graph.communicability_betweenness_centrality()
+        click.echo(result)
+
+        if s:
+
+            ginx_graph.showbar(
+                json.loads(result),
+                'Communicability Betweenness Centrality for: {}'.format(project_name), project_name
+            )
+
+        return
 
     if f:
-        click.echo(ginx_graph.current_flow_betweenness_centrality())
+
+        result = ginx_graph.current_flow_betweenness_centrality()
+        click.echo(result)
+
+        if s:
+            result = [(d[0], d[1]) for d in json.loads(result)]
+            ginx_graph.showbar(
+                result,
+                'Current Flow Betweenness Centrality for: {}'.format(project_name), project_name
+            )
+
+        return
 
     if t:
-        click.echo(ginx_graph.triangles())
 
-    if d:
-        click.echo(ginx_graph.d_central())
+        result = ginx_graph.triangles()
+        click.echo(result)
 
-    if p:
-        click.echo(ginx_graph.d_periphery())
+        if s:
+
+            result = list(json.loads(result).items())
+            ginx_graph.showbar(
+                result,
+                'Numbers of triangles for: {}'.format(project_name), project_name
+            )
+
+        return
+
+    if m:
+        print(ginx_graph.girvan_newman())
+
+    if w:
+
+        result = ginx_graph.betweeness_centrality()
+        click.echo(result)
+
+        if s:
+
+            ginx_graph.showme_centrality(
+                json.loads(result),
+                'Betweeness centrality for {}'.format(project_name)
+            )
+
+        return
 
     if s:
-        ginx_graph.showme()
+
+        center = json.loads(ginx_graph.d_central())
+        periphery = json.loads(ginx_graph.d_periphery())
+        ginx_graph.showme_center_periphery(center, periphery)
 
 @click.command()
 def docker():

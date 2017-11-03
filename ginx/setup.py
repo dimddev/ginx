@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 import os
 from subprocess import call
-from setuptools import setup, find_packages
 from distutils.command.build_py import build_py as _build_py
+from setuptools import setup, find_packages
 
 ginx_dev = {'develop': [
     "pylint",      # MIT license
     "coverage",
     ]
-}
+           }
 
 def get_version():
+    """get_version"""
     with open('../VERSION.txt') as version:
         return version.read()
 
@@ -18,6 +19,7 @@ class install_numpy_scipy(_build_py):
     """Customized setuptools install command - because of strange bug with scipy"""
     call(['pip', 'install', 'numpy'])
     call(['pip', 'install', 'scipy'])
+    call(['pip', 'install', 'pandas'])
 
 setup(
     name='ginxcli',

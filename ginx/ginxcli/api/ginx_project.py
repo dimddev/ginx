@@ -186,7 +186,12 @@ class GinXBuilder:
 
             return False
 
+        nodes = []
+
         for crew in from_file:
+            # crew is a node
+            # first let's save all nodes
+            nodes.append(crew)
 
             data[crew] = []
             temp = []
@@ -215,6 +220,9 @@ class GinXBuilder:
             data[crew] += temp
             self.write_graph_db(project_name, {crew: data[crew]}, crew)
 
+        with open('{0}/.ginx/{1}/{1}-nodes.graph'.format(self.__user_home, project_name), 'w') as nodes_fd:
+            nodes_fd.write(json.dumps(nodes))
+
         result = self.write_graph_db(project_name, data, project_name)
 
         if result is True:
@@ -230,9 +238,23 @@ class GinXBuilder:
 
         :rtype: dict
         """
-        if project_name and pathlib.Path('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)).is_file():
-            with open('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)) as graph:
-                return self.edges_mean(json.load(graph), project_name)
-        else:
-            click.echo('Project {} does not exists'.format(project_name))
-            sys.exit()
+
+        result = {}
+
+        if project_name:
+
+            if pathlib.Path('{0}/.ginx/{1}/{1}-nodes.graph'.format(self.__user_home, project_name)).is_file():
+                with open('{0}/.ginx/{1}/{1}-nodes.graph'.format(self.__user_home, project_name)) as graph:
+                    result['nodes'] = json.load(graph)
+            else:
+                click.echo('A node file for project {} is missing'.format(project_name))
+                sys.exit()
+
+            if pathlib.Path('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)).is_file():
+                with open('{0}/.ginx/{1}/{1}-edges.graph'.format(self.__user_home, project_name)) as graph:
+                    result['edges'] = self.edges_mean(json.load(graph), project_name)
+            else:
+                click.echo('An edge file for project {} is missing'.format(project_name))
+                sys.exit()
+
+            return result

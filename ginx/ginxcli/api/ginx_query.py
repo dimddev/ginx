@@ -1,10 +1,16 @@
 """ GinX Query Module"""
+
+import itertools
+
 from networkx.algorithms import current_flow_closeness_centrality
 from networkx.algorithms import current_flow_betweenness_centrality
 from networkx.algorithms.centrality import communicability_betweenness_centrality
+from networkx.algorithms.centrality.betweenness import betweenness_centrality
+from networkx.algorithms.community import centrality
 from networkx.algorithms import distance_measures
 from networkx.algorithms import clustering
 from networkx.algorithms import triangles
+from networkx.algorithms.connectivity import local_edge_connectivity
 
 from .ginx_shared import GinXBase
 
@@ -15,14 +21,16 @@ class GinXQuery(GinXBase):
     def girvan_newman(self):
         """Finds communities in a graph using the Girvan–Newman method."""
         # https://github.com/networkx/networkx/blob/master/networkx/algorithms/community/centrality.py
-        pass
+        return [x for x in itertools.islice(centrality.girvan_newman(self.graph), 4)]
 
-    def betweeness_centrality(self, node):
+    def betweeness_centrality(self, k=None):
         """Compute the shortest-path betweenness centrality for nodes.
-           Betweenness centrality of a node $node$ is the sum of the
-           fraction of all-pairs shortest paths that pass through $node$
+           Betweenness centrality of a node V is the sum of the
+           fraction of all-pairs shortest paths that pass through V.
+           A node with higher betweenness centrality would have more
+           control over the network, because more information will pass through that node.
         """
-        pass
+        return self.common.sorted_dict(betweenness_centrality, self.graph)
 
     def current_flow_closeness_centrality(self):
         """Compute current-flow closeness centrality for nodes.
@@ -57,10 +65,10 @@ class GinXQuery(GinXBase):
 
     def d_cluster(self):
         """d_cluster"""
-        return clustering(self.graph)
+        return self.common.to_json(clustering(self.graph))
 
     def triangles(self):
         """Triangles
         Finds the number of triangles that include a node as one vertex
         """
-        return triangles(self.graph)
+        return self.common.to_json(triangles(self.graph))
